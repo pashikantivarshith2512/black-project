@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://ikigai-cafe-backend.onrender.com/api';
 
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
@@ -45,7 +46,7 @@ export async function fetchApi<T = any>(
     console.error(`API Error on ${endpoint}:`, error);
     return {
       success: false,
-      message: 'Unable to connect to IKIGAI server. Please verify backend is running on port 5000.',
+      message: 'Connecting to IKIGAI cloud server... (If server was sleeping, please wait a few seconds and retry).',
     };
   }
 }

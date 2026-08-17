@@ -74,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="antialiased min-h-screen flex flex-col bg-espresso-900 text-ikigai-cream">
+      <body className="antialiased min-h-screen flex flex-col transition-colors duration-300">
         <ThemeProvider>
           <AuthProvider>
             <CartProvider>
