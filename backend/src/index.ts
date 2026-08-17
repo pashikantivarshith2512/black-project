@@ -16,9 +16,9 @@ import adminRoutes from './routes/admin.routes';
 
 const app = express();
 
-// Middlewares
+// Enable CORS for all incoming production origins (Vercel, Localhost, etc.)
 app.use(cors({
-  origin: [env.CORS_ORIGIN, env.FRONTEND_URL, 'http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: true,
   credentials: true,
 }));
 
@@ -50,10 +50,10 @@ app.use('/api/admin', adminRoutes);
 // Error Handler
 app.use(errorHandler);
 
-const PORT = parseInt(env.PORT, 10) || 5000;
+const PORT = parseInt(process.env.PORT || '5000', 10);
 
-app.listen(PORT, () => {
-  console.log(`☕ IKIGAI Café Backend API running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`☕ IKIGAI Café Backend API running on port ${PORT} (0.0.0.0)`);
 });
 
 export default app;
