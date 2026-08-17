@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliveryOption {
+  DINE_IN
+  KERBSIDE_PICKUP
+  NO_CONTACT_DELIVERY
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum GalleryCategory {
+  AMBIENCE
+  FOOD
+  COFFEE
+  EVENTS
+  CUSTOMER_MOMENTS
+}
+
+enum LoyaltyTransactionType {
+  EARNED
+  REDEEMED
+}
+
+model User {
+  id           String          @id @default(uuid())
+  email        String          @unique
+  password     String
+  name         String
+  phone        String?
+  role         Role            @default(CUSTOMER)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  orders       Order[]
+  reservations Reservation[]
+  reviews      Review[]
+  loyalty      LoyaltyAccount?
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  image       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  items       MenuItem[]
+}
+
+model MenuItem {
+  id           String      @id @default(uuid())
+  name         String
+  slug         String      @unique
+  description  String
+  price        Float
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  availability Boolean     @default(true)
+  isSpecialty  Boolean     @default(false)
+  image        String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  orderItems   OrderItem[]
+}
+
+model Order {
+  id                  String         @id @default(uuid())
+  orderNumber         String         @unique
+  userId              String?
+  user                User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName        String
+  customerEmail       String
+  customerPhone       String
+  deliveryOption      DeliveryOption @default(DINE_IN)
+  address             String?
+  totalAmount         Float
+  status              OrderStatus    @default(PENDING)
+  paymentStatus       String         @default("PENDING_TEST")
+  specialInstructions String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  items               OrderItem[]
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId   String
+  menuItem     MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  quantity     Int
+  price        Float
+  specialNotes String?
+}
+
+model Reservation {
+  id                String            @id @default(uuid())
+  reservationNumber String            @unique
+  userId            String?
+  user              User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name              String
+  email             String
+  phone             String
+  date              String
+  time              String
+  guests            Int
+  status            ReservationStatus @default(PENDING)
+  specialRequests   String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name       String
+  rating     Int
+  comment    String
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Gallery {
+  id        String          @id @default(uuid())
+  title     String
+  category  GalleryCategory @default(AMBIENCE)
+  imageUrl  String
+  createdAt DateTime        @default(now())
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  isSubscribed Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model LoyaltyAccount {
+  id          String               @id @default(uuid())
+  userId      String               @unique
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points      Int                  @default(0)
+  totalEarned Int                  @default(0)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  history     LoyaltyTransaction[]
+}
+
+model LoyaltyTransaction {
+  id               String                 @id @default(uuid())
+  loyaltyAccountId String
+  account          LoyaltyAccount         @relation(fields: [loyaltyAccountId], references: [id], onDelete: Cascade)
+  points           Int
+  type             LoyaltyTransactionType
+  description      String
+  createdAt        DateTime               @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
